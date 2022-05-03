@@ -1,5 +1,6 @@
 //import liraries
 import React, {useReducer} from 'react';
+import jsonserver from '../../api/jsonserver';
 
 export const BlogContext = React.createContext();
 
@@ -29,7 +30,7 @@ const blogReducer = (BlogPost, action) => {
       return [
         ...BlogPost,
         {
-          id: Math.floor(Math.random() * 99999),
+          id: action.payload.id,
           title: action.payload.title,
           content: action.payload.content,
         },
@@ -41,6 +42,9 @@ const blogReducer = (BlogPost, action) => {
       return BlogPost.filter(item => {
         return Update_BlogPostData(item, action);
       });
+
+    case 'Get_blogPost':
+      return action.payload;
     default:
       return BlogPost;
   }
@@ -49,23 +53,63 @@ const blogReducer = (BlogPost, action) => {
 export const BlogPostProvider = ({children}) => {
   const [BlogPost, dispatch] = useReducer(blogReducer, []);
 
+  const getBlogPost=async ()=>{
+     const response= await jsonserver.get('/blogPosts').then((response)=>{dispatch({type:'Get_blogPost',payload:response.data});}).catch(error=>console.log(error));
+     //dispatch({type:'Get_blogPost',payload:response.data});
+    
+  };
   const addBlogPost = (title, content) => {
-    dispatch({type: 'Add_blogPost', payload: {title: title, content: content}});
+    const id= Math.floor(Math.random() * 99999);
+    //add BlogPost to jsonserver
+      jsonserver.post('/blogPosts', {
+          id:id,
+          title:title,
+          content:content
+      }).then(resp => {
+          console.log(resp.data);
+      }).catch(error => {
+          console.log(error);
+      });
+      //add to BlogPost Usereducer
+        getBlogPost();
+    //dispatch({type: 'Add_blogPost', payload: {id:id,title: title, content: content}});
   };
   const deleteBlogPost = id => {
-    dispatch({type: 'delete_blogPost', payload: id});
+    //delete perticular blogpost from jsonserver
+    jsonserver.delete(`/blogPosts/${id}`)
+    .then(resp => {
+        console.log(resp.data)
+    }).catch(error => {
+        console.log(error);
+    });
+    //delete from usereducer
+    getBlogPost();
+    //dispatch({type: 'delete_blogPost', payload: id});
   };
   const updateBlogPost = (id, title, content) => {
-    dispatch({
-      type: 'Update_blogPost',
-      payload: {id: id, title: title, content: content},
-    });
-    console.log('id:' + id + '\ttitle:' + title + '\tcontent:' + content);
+
+    jsonserver.put( `/blogPost/${id}`, {
+    title:title,
+    content:content
+  }).then(resp => {
+
+    console.log(resp.data);
+  }).catch(error => {
+
+    console.log(error);
+});
+
+  getBlogPost();
+    // dispatch({
+    //   type: 'Update_blogPost',
+    //   payload: {id: id, title: title, content: content},
+    // });
+    
   };
 
   return (
     <BlogContext.Provider
-      value={{data: BlogPost, addBlogPost, deleteBlogPost, updateBlogPost}}>
+      value={{data: BlogPost, addBlogPost, deleteBlogPost, updateBlogPost,getBlogPost}}>
       {children}
     </BlogContext.Provider>
   );

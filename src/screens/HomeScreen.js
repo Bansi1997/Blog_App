@@ -1,5 +1,5 @@
 //import liraries
-import React from 'react';
+import React,{useEffect} from 'react';
 import {
   View,
   Text,
@@ -12,12 +12,17 @@ import Header from '../components/Header';
 import {BlogContext} from '../components/context/BlogPostProvider';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
+
 //FontAwesome.loadFont();
 // create a component
 
 const HomeScreen = ({navigation}) => {
-  const {data, addBlogPost, deleteBlogPost} = React.useContext(BlogContext);
+  const {data, deleteBlogPost,getBlogPost} = React.useContext(BlogContext);
 
+  useEffect(()=>{
+    getBlogPost();
+    //console.log(data.title);
+  },[]);
   return (
     <View style={styles.mainWrapper}>
       <SafeAreaView>
