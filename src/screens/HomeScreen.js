@@ -22,6 +22,12 @@ const HomeScreen = ({navigation}) => {
   useEffect(()=>{
     getBlogPost();
     // console.log(data.title);
+    const response=navigation.addListener('focus',()=>{
+      getBlogPost();
+    });
+    return()=>{
+      response.remove();
+    }
   },[]);
   return (
     <View style={styles.mainWrapper}>
