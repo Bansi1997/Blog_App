@@ -21,7 +21,7 @@ const HomeScreen = ({navigation}) => {
 
   useEffect(()=>{
     getBlogPost();
-    //console.log(data.title);
+    console.log(data.title);
   },[]);
   return (
     <View style={styles.mainWrapper}>
